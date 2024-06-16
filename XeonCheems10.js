@@ -1146,7 +1146,7 @@ fs.writeFileSync('./src/data/role/user.json', JSON.stringify(xeonverifieduser, n
 }
         
         switch (isCommand) {
-case 'jirr':{
+case 'wow':{
     (async()=>{
            const { downloadContentFromMessage } = require("@whiskeysockets/baileys")
            let quoted =  m.message.extendedTextMessage.contextInfo.quotedMessage
@@ -1165,12 +1165,172 @@ case 'jirr':{
            })()
    }
    break
+                case 'play':  case 'song': {
+if (!text) return replygcxeon(`Example : ${prefix + command} anime whatsapp status`)
+const xeonplaymp3 = require('./lib/ytdl')
+let yts = require("youtube-yts")
+        let search = await yts(text)
+        let anup3k = search.videos[0]
+const pl= await xeonplaymp3.mp3(anup3k.url)
+await XeonBotInc.sendMessage(m.chat,{
+    audio: fs.readFileSync(pl.path),
+    fileName: anup3k.title + '.mp3',
+    mimetype: 'audio/mp4', ptt: true,
+    contextInfo:{
+        externalAdReply:{
+            title:anup3k.title,
+            body: botname,
+            thumbnail: await fetchBuffer(pl.meta.image),
+            sourceUrl: websitex,
+            mediaType:2,
+            mediaUrl:anup3k.url,
+        }
+
+    },
+},{quoted:m})
+await fs.unlinkSync(pl.path)
+}
+break
+                case 'addvn':{
+if (!XeonTheCreator) return XeonStickOwner()
+if (args.length < 1) return replygcxeon('Whats the audio name?')
+if (VoiceNoteXeon.includes(q)) return replygcxeon("The name is already in use")
+let delb = await XeonBotInc.downloadAndSaveMediaMessage(quoted)
+VoiceNoteXeon.push(q)
+await fsx.copy(delb, `./XeonMedia/audio/${q}.mp3`)
+fs.writeFileSync('./XeonMedia/database/xeonvn.json', JSON.stringify(VoiceNoteXeon))
+fs.unlinkSync(delb)
+replygcxeon(`Success Adding Audio\nCheck by typing ${prefix}listvn`)
+}
+break
+case 'delvn':{
+if (!XeonTheCreator) return XeonStickOwner()
+if (args.length < 1) return replygcxeon('Enter the vn name')
+if (!VoiceNoteXeon.includes(q)) return replygcxeon("The name does not exist in the database")
+let wanu = VoiceNoteXeon.indexOf(q)
+VoiceNoteXeon.splice(wanu, 1)
+fs.writeFileSync('./XeonMedia/database/xeonvn.json', JSON.stringify(VoiceNoteXeon))
+fs.unlinkSync(`./XeonMedia/audio/${q}.mp3`)
+replygcxeon(`Success deleting vn ${q}`)
+}
+break
+                case 'q': case 'quoted': {
+if (!m.quoted) return replygcxeon('Reply the Message!!')
+let xeonquotx= await XeonBotInc.serializeM(await m.getQuotedObj())
+if (!xeonquotx.quoted) return replygcxeon('The message you are replying to is not sent by the bot')
+await xeonquotx.quoted.copyNForward(m.chat, true)
+}
+break
+case 'listvn':{
+let teks = '┌──⭓「 *VN List* 」\n│\n'
+for (let x of VoiceNoteXeon) {
+teks += `│⭔ ${x}\n`
+}
+teks += `│\n└────────────⭓\n\n*Totally there are : ${VoiceNoteXeon.length}*`
+replygcxeon(teks)
+}
+break
    case 'self': {
     if (!XeonTheCreator) return XeonStickOwner()
     XeonBotInc.public = false
     replygcxeon('*Successful in Changing To Self Usage*')
 }
 break
+                case 'public': {
+                if (!XeonTheCreator) return XeonStickOwner()
+                XeonBotInc.public = true
+                replygcxeon('*Successful in Changing To Public Usage*')
+            }
+            break
+                case 'ping': case 'botstatus': case 'statusbot': case 'p': {
+	const used = process.memoryUsage()
+                const cpus = os.cpus().map(cpu => {
+                    cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
+			        return cpu
+                })
+                const cpu = cpus.reduce((last, cpu, _, { length }) => {
+                    last.total += cpu.total
+                    last.speed += cpu.speed / length
+                    last.times.user += cpu.times.user
+                    last.times.nice += cpu.times.nice
+                    last.times.sys += cpu.times.sys
+                    last.times.idle += cpu.times.idle
+                    last.times.irq += cpu.times.irq
+                    return last
+                }, {
+                    speed: 0,
+                    total: 0,
+                    times: {
+			            user: 0,
+			            nice: 0,
+			            sys: 0,
+			            idle: 0,
+			            irq: 0
+                }
+                })
+                let timestamp = speed()
+                let latensi = speed() - timestamp
+                neww = performance.now()
+                oldd = performance.now()
+                respon = `
+Response Speed ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\nRuntime : ${runtime(process.uptime())}
+
+💻 Info Server
+RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
+
+_NodeJS Memory Usaage_
+${Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v=>v.length)),' ')}: ${formatp(used[key])}`).join('\n')}
+
+${cpus[0] ? `_Total CPU Usage_
+${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
+_CPU Core(s) Usage (${cpus.length} Core CPU)_
+${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}` : ''}
+                `.trim()
+	XeonBotInc.relayMessage(m.chat,  {
+        requestPaymentMessage: {
+          currencyCodeIso4217: 'INR',
+          amount1000: 999999999,
+          requestFrom: m.sender,
+          noteMessage: {
+          extendedTextMessage: {
+          text: respon,
+          contextInfo: {
+          externalAdReply: {
+          showAdAttribution: true
+          }}}}}}, {})
+    }
+	
+	break
+                case 'bass': case 'blown': case 'deep': case 'earrape': case 'fast': case 'fat': case 'nightcore': case 'reverse': case 'robot': case 'slow': case 'smooth': case 'squirrel':
+                try {
+                let set
+                if (/bass/.test(command)) set = '-af equalizer=f=54:width_type=o:width=2:g=20'
+                if (/blown/.test(command)) set = '-af acrusher=.1:1:64:0:log'
+                if (/deep/.test(command)) set = '-af atempo=4/4,asetrate=44500*2/3'
+                if (/earrape/.test(command)) set = '-af volume=12'
+                if (/fast/.test(command)) set = '-filter:a "atempo=1.63,asetrate=44100"'
+                if (/fat/.test(command)) set = '-filter:a "atempo=1.6,asetrate=22100"'
+                if (/nightcore/.test(command)) set = '-filter:a atempo=1.06,asetrate=44100*1.25'
+                if (/reverse/.test(command)) set = '-filter_complex "areverse"'
+                if (/robot/.test(command)) set = '-filter_complex "afftfilt=real=\'hypot(re,im)*sin(0)\':imag=\'hypot(re,im)*cos(0)\':win_size=512:overlap=0.75"'
+                if (/slow/.test(command)) set = '-filter:a "atempo=0.7,asetrate=44100"'
+                if (/smooth/.test(command)) set = '-filter:v "minterpolate=\'mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=120\'"'
+                if (/squirrel/.test(command)) set = '-filter:a "atempo=0.5,asetrate=65100"'
+                if (/audio/.test(mime)) {
+                let media = await XeonBotInc.downloadAndSaveMediaMessage(quoted)
+                let ran = getRandom('.mp3')
+                exec(`ffmpeg -i ${media} ${set} ${ran}`, (err, stderr, stdout) => {
+                fs.unlinkSync(media)
+                if (err) return replygcxeon(err)
+                let buff = fs.readFileSync(ran)
+                XeonBotInc.sendMessage(m.chat, { audio: buff, mimetype: 'audio/mpeg', ptt: true }, { quoted : m })
+                fs.unlinkSync(ran)
+                })
+                } else replygcxeon(`Reply to the audio you want to change with a caption *${prefix + command}*`)
+                } catch (e) {
+                replygcxeon(e)
+                }
+                break
 case 's': case 'sticker': case 'stiker': {
     if (!quoted) return replygcxeon(`Send/Reply Images/Videos/Gifs With Captions ${prefix+command}\nVideo Duration 1-9 Seconds`)
     if (/image/.test(mime)) {
@@ -1185,6 +1345,63 @@ case 's': case 'sticker': case 'stiker': {
     }
     }
     break   
+                case 'setcmd': {
+                if (!m.quoted) return replygcxeon('Reply Message!')
+                if (!m.quoted.fileSha256) return replygcxeon('SHA256 Hash Missing')
+                if (!text) return replygcxeon(`For What Command?`)
+                let hash = m.quoted.fileSha256.toString('base64')
+                if (global.db.data.sticker[hash] && global.db.data.sticker[hash].locked) return replygcxeon('You have no permission to change this sticker command')
+                global.db.data.sticker[hash] = {
+                    text,
+                    mentionedJid: m.mentionedJid,
+                    creator: m.sender,
+                    at: + new Date,
+                    locked: false,
+                }
+                replygcxeon(`Done!`)
+            }
+            break
+                case 'tomp3': {
+                if (!/video/.test(mime) && !/audio/.test(mime)) return replygcxeon(`Send/Reply Video/Audio that you want to make into MP3 with captions ${prefix + command}`)
+                let media = await XeonBotInc.downloadMediaMessage(qmsg)
+                let audio = await toAudio(media, 'mp4')
+                XeonBotInc.sendMessage(m.chat, {
+                    audio: audio,
+                    mimetype: 'audio/mp4',
+                    ptt: true
+                }, {
+                    quoted: m
+                })
+
+            }
+            break
+case 'delcmd': {
+                let hash = m.quoted.fileSha256.toString('base64')
+                if (!hash) return replygcxeon(`No hashes`)
+                if (global.db.data.sticker[hash] && global.db.data.sticker[hash].locked) return replygcxeon('You have no permission to delete this sticker command')             
+                delete global.db.data.sticker[hash]
+                replygcxeon(`Done!`)
+            }
+            break
+case 'listcmd': {
+                let teks = `
+*List Hash*
+Info: *bold* hash is Locked
+${Object.entries(global.db.data.sticker).map(([key, value], index) => `${index + 1}. ${value.locked ? `*${key}*` : key} : ${value.text}`).join('\n')}
+`.trim()
+                XeonBotInc.sendText(m.chat, teks, m, { mentions: Object.values(global.db.data.sticker).map(x => x.mentionedJid).reduce((a,b) => [...a, ...b], []) })
+            }
+            break 
+case 'lockcmd': {
+                if (!XeonTheCreator) return XeonStickOwner()
+                if (!m.quoted) return replygcxeon('Reply Message!')
+                if (!m.quoted.fileSha256) return replygcxeon('SHA256 Hash Missing')
+                let hash = m.quoted.fileSha256.toString('base64')
+                if (!(hash in global.db.data.sticker)) return replygcxeon('Hash not found in database')
+                global.db.data.sticker[hash].locked = !/^un/i.test(command)
+                replygcxeon('Done!')
+            }
+            break
     case 'toimage':
     case 'jadi-gambar':
             case 'toimg': {
@@ -1205,15 +1422,141 @@ case 's': case 'sticker': case 'stiker': {
 
             }
             break
+                case 'statusaudio':
+            case 'upswaudio': {
+               if (!XeonTheCreator) return XeonStickOwner()
+               if (/audio/.test(mime)) {
+                  var audiosw = await XeonBotInc.downloadAndSaveMediaMessage(quoted)
+                  await XeonBotInc.sendMessage('status@broadcast', {
+                     audio: {
+                        url: audiosw
+                     },
+                     mimetype: 'audio/mp4',
+                     ptt: true
+                  }, {
+                     backgroundColor: '#FF000000',
+                     statusJidList: Object.keys(global.db.data.users)
+                  })
+                  await replygcxeon(mess.done)
+               } else {
+                  replygcxeon('Reply to audio')
+               }
             }
+            break
+                case 'm':{
+                var mmj = `List Fitur
+- wow
+- play
+- addvn
+- delvn
+- listvn
+- self
+- public
+- ping
+- bass
+- blown
+- deep
+- earrape
+- fast
+- fat
+- nightcore
+- reverse
+- upswaudio
+- robot
+- slow
+- smooth
+- squirrel
+- stiker
+- setcmd
+- delcmd
+- listcmd
+- tomp3
+- toimg`
+m.reply(mmj)
+                }
+                break
+                case 'instagram': case 'igvideo': case 'igimage': case 'igvid': case 'igimg': case 'igdl': {
+	  if (!text) return replygcxeon(`You need to give the URL of Any Instagram video, post, reel, image`)
+  let res
+  try {
+    res = await fetch(`https://www.guruapi.tech/api/igdlv1?url=${text}`)
+  } catch (error) {
+    return replygcxeon(`An error occurred: ${error.message}`)
+  }
+  let api_response = await res.json()
+  if (!api_response || !api_response.data) {
+    return replygcxeon(`No video or image found or Invalid response from API.`)
+  }
+  const mediaArray = api_response.data;
+  for (const mediaData of mediaArray) {
+    const mediaType = mediaData.type
+    const mediaURL = mediaData.url_download
+    let cap = `HERE IS THE ${mediaType.toUpperCase()}`
+    if (mediaType === 'video') {
+      XeonBotInc.sendMessage(m.chat, {video: {url: mediaURL}, caption: cap}, {quoted: m})
+    } else if (mediaType === 'image') {
+      XeonBotInc.sendMessage(m.chat, { image: {url: mediaURL}, caption: cap}, {quoted: m})
+    }
+  }
+}
+break
+                case 'ytmp4': case 'ytvideo': {
+const xeonvidoh = require('./lib/ytdl')
+if (args.length < 1 || !isUrl(text) || !xeonvidoh.isYTUrl(text)) replygcxeon(`Where is the link??\n\nExample : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 128kbps`)
+const vid=await xeonvidoh.mp4(text)
+const ytc=`
+*${themeemoji}Tittle:* ${vid.title}
+*${themeemoji}Date:* ${vid.date}
+*${themeemoji}Duration:* ${vid.duration}
+*${themeemoji}Quality:* ${vid.quality}`
+await XeonBotInc.sendMessage(m.chat,{
+    video: {url:vid.videoUrl},
+    caption: ytc
+},{quoted:m})
+}
+break
+                default:
+                if (budy.startsWith('=>')) {
+                    if (!XeonTheCreator) return XeonStickOwner()
+                    function Return(sul) {
+                        sat = JSON.stringify(sul, null, 2)
+                        bang = util.format(sat)
+                        if (sat == undefined) {
+                            bang = util.format(sul)
+                        }
+                        return replygcxeon(bang)
+                    }
+                    try {
+                        replygcxeon(util.format(eval(`(async () => { return ${budy.slice(3)} })()`)))
+                    } catch (e) {
+                        replygcxeon(String(e))
+                    }
+                }
+
+                if (budy.startsWith('>')) {
+                    if (!XeonTheCreator) return XeonStickOwner()
+                    try {
+                        let evaled = await eval(budy.slice(2))
+                        if (typeof evaled !== 'string') evaled = require('util').inspect(evaled)
+                        await replygcxeon(evaled)
+                    } catch (err) {
+                        await replygcxeon(String(err))
+                    }
+                }
+                if (budy.startsWith('$')) {
+                    if (!XeonTheCreator) return XeonStickOwner()
+                    exec(budy.slice(2), (err, stdout) => {
+                        if (err) return replygcxeon(err)
+                        if (stdout) return replygcxeon(stdout)
+                    })
+                }
+            }
+        
     } catch (err) {
+        
         console.log(util.format(err))
-        let e = String(err)
-XeonBotInc.sendMessage("123123@s.whatsapp.net", { text: "Hello developer, there seems to be an error, please fix it " + util.format(e), 
-contextInfo:{
-forwardingScore: 9999999, 
-isForwarded: true
-}})
+        
+
 if (e.includes("conflict")) return
 if (e.includes("not-authorized")) return
 if (e.includes("already-exists")) return
